@@ -1,8 +1,8 @@
-wc -l /workspaces/iit-linux-search-259788/names/fullnames_with_age.txt
-grep -o "Smith" /workspaces/iit-linux-search-259788/access_small.log 
-grep -oP "age=\K.*" /workspaces/iit-linux-search-259788/names/fullnames_with_age.txt | sort | uniq -c | sort -nr | head -n 1
+grep "/login" /workspaces/iit-linux-search-259788/logs/access_small.log | wc -l
+grep -o "Smith" /workspaces/iit-linux-search-259788/names/fullnames_with_age.txt | wc -l
 grep -o "Smith" /workspaces/iit-linux-search-259788/names/fullnames_simple.txt [FILE DOES NOT EXIST]
-grep -oP "^[A-Z][a-zA-Z]+\s+[A-Z][a-zA-Z]+" /workspaces/iit-linux-search-259788/names/fullnames_with_age | sort | uniq -c | sort -nr | head -n 10
+grep -oP "age=\K.*" /workspaces/iit-linux-search-259788/names/fullnames_with_age.txt | sort | uniq -c | sort -nr | head -n 1
+grep -oP "^[A-Z][a-zA-Z]+\s+[A-Z][a-zA-Z]+" /workspaces/iit-linux-search-259788/names/fullnames_with_age.txt | sort | uniq -c | sort -nr | head -n 10
 grep -oP "user=\K[^ ]+" /workspaces/iit-linux-search-259788/logs/app_small.log | sort | uniq | wc -l
 grep -oP "action=\K[^ ]+" /workspaces/iit-linux-search-259788/logs/app_medium.log | sort | uniq -c | sort -nr
 grep -oP "^\S+\s+\S+\s+\K\S+" /workspaces/iit-linux-search-259788/logs/app_small.log | sort | uniq -c | sort -nr
@@ -11,9 +11,16 @@ grep -oP "task=\K[^ ]+" /workspaces/iit-linux-search-259788/logs/system_small.lo
 \K - meta reset
 \S - non-whitespace
 \s - whitespace
-+ - join regex expressions
-[^ ] - literally anything except " "
-^ - position at start of line (assertion)
++ - greedy
+^ - position at start of line (assertion), alternatively when in brackets;
+[^] - literally anything except regex match given after ^ in brackets, ie. [^ ] returns anything besides " "
 [A-Z] - any capital
 [a-zA-Z] - any letter
 -o = occurence
+-P = Perl-compatbile Regex Expression flag
+wc -l = count lines
+sort = sort
+sort -nr = sort numerically by first value, reverse (inc -> dec)
+uniq = return only unique occurences, works only with sort
+uniq -c = count occurences, return count and unique word
+head -n VALUE = grab only VALUE amount of lines from the top (head) of returned text
