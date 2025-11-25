@@ -23,27 +23,33 @@ Example: wc command is to count data in a given file. -l parameter is for counti
 
 `wc -l` counts all the lines (note `-l` flag for lines)
 
-### 2. How many occurrences of Smith are in fullnames_with_age.txt?
+### 2. How many different ages are in fullnames_with_age.txt?
 
 ![Task 2](task2.png)
 
 **Explanation**
 
-`grep -o "Smith` shows only exact matching parts of the search
+`grep -oP "age=\K[^ ]+` returns only the matching string (`-o`) after `=` (`\K`), finds any non-space character (`[^ ]`) as many times as it can (`+`). `-P` for PCRE.
 
-`wc -l` counts all the lines (note `-l` flag for lines)
+`sort` sorts the returned data.
 
-### 3. How many occurrences of Smith are in fullnames_simple.txt?
+`uniq` grabs only the unique occurences of the users. Without `sort`, `uniq` does not work properly.
+
+`wc -l` counts the returned lines (note `-l` flag for lines).
+
+### 3. How many unique first names are in fullnames_with_age.txt?
 
 ![Task 3](task3.png)
 
 **Explanation** 
 
-`grep -o "Smith` shows only exact matching parts of the search
+`grep -oP "^\S+"` returns only the matching string (`-o`) from the beginning of a line (`^`), finding as many non-whitespace characters (`\S`) as it can (greedy, `+`).
 
-`wc -l` counts all the lines (note `-l` flag for lines)
+`sort` sorts the returned data.
 
-Ideally a file would exist, but this would work if one did.
+`uniq` grabs only the unique occurences of the users. Without `sort`, `uniq` does not work properly.
+
+`wc -l` counts the returned lines (note `-l` flag for lines).
 
 ### 4. Which age is most frequent in fullnames_with_age.txt?
 
@@ -61,13 +67,13 @@ The first `sort` arranges everything in order.
 
 `head -n 1` grabs the first (`-n 1`) line from the returned value.
 
-### 5. Show the 10 most common names (first+last) in fullnames_with_age.txt.
+### 5. Which username failed login most often in auth_small.csv?
 
 ![Task 5](task5.png)
 
 **Explanation**
 
-`grep -oP "^[A-Z][a-zA-Z]+\s+[A-Z][a-zA-Z]+"` returns only the string matching the Perl-compatible regex expression given. `^` sends the "cursor" to the beginning of the line, `[A-Z][a-zA-Z]+` finds any word that starts with a capital, `\s` adds a whitespace to the searched string, and the process is repeated for the surname. `+` is a "greedy" regex token, repeating the previous match as many times as possible.
+`grep -oP "^[^,]+,\K[^,]+(?=,[^,]+,FAIL$)"` returns only the string matching (`-o`) the Perl-compatible regex expression (`-P`) given. `^` sends the "cursor" to the beginning of the line, `[^,]+` finds any character that isn't a comma (`[^,]`) as many times as it can (`+`), `,\K[^,]+` meta returns the grep value to the position of the name and finds the name (`[^,]+`). We then use a positive lookahead that checks (`?=`), whether the rest of the line contains the structure of `,[^,]+,FAIL` (comma, any non-comma character as many times as possible, comma, `FAIL`), ending the checked line with a `$`. 
 
 The first `sort` arranges everything in order.
 
@@ -75,25 +81,37 @@ The first `sort` arranges everything in order.
 
 `sort -nr` sorts numerically (`-n`) by the first value, and then reverses the order (`-r`) from increasing to decreasing.
 
-`head -n 10` grabs the first ten (`-n 10`) lines from the returned value.
+`head -n 1` grabs the first (`-n 1`) line from the returned value.
 
-### 6. How many unique users are in app_small.log?
+### 6. How many lines in system_small.log have ok=true?
 
 ![Task 6](task6.png)
 
 **Explanation**
 
-`grep -oP "user=\K[^ ]+"` returns only the matching string (`-o`) after `=` (`\K`), finds any non-space character (`[^ ]`) as many times as it can (`+`). `-P` for PCRE.
-
-`sort` sorts the returned data.
-
-`uniq` grabs only the unique occurences of the users. Without `sort`, `uniq` does not work properly.
+`grep "ok=true"` finds all the lines that contain `"ok=true"` in them.
 
 `wc -l` counts the returned lines (note `-l` flag for lines).
 
-### 7. Which status code appears most often in access_medium.log? 
+### 7. Which level (INFO, WARN, ERROR) appears most often in system_small.log?
 
 ![Task 7](task7.png)
+
+**Explanation**
+
+`grep -oP "level=\K[^ ]+"` returns only the matching string (`-o`) after `=` (`\K`), finds any non-space character (`[^ ]`) as many times as it can (`+`). `-P` for PCRE.
+
+The first `sort` arranges everything in order.
+
+`uniq -c` counts all the occurences and returns the count in front of the value. Without the initial `sort`, `uniq -c` does not work properly.
+
+`sort -nr` sorts numerically (`-n`) by the first value, and then reverses the order (`-r`) from increasing to decreasing.
+
+`head -n 1` grabs the first (`-n 1`) line from the returned value.
+
+### 8. What is the top 3 most common actions in app_small.log?
+
+![Task 8](task8.png)
 
 **Explanation**
 
@@ -105,34 +123,18 @@ The first `sort` arranges everything in order.
 
 `sort -nr` sorts numerically (`-n`) by the first value, and then reverses the order (`-r`) from increasing to decreasing.
 
-### 8. What is the top 3 most common modules in app_small.log?
+`head -n 3` grabs the first three (`-n 3`) lines from the top of the returned values.
 
-![Task 8](task8.png)
-
-**Explanation**
-
-`grep -oP "^\S+\s+\S+\s+\K\S+"` uses a chain of PCRE expressions (`-P`). `^` moves the "cursor" to the start of the line. `\S+\s+` finds as many non-whitespace (`\S`) characters as it can (`+`) and then as many _whitespace_ (`\s`) characters as it can (`+`). We repeat this twice (obtaining `^\S+\s+\S+\s+`), and then start (`\K`) our returned value at the next set of non-whitespace characters (`\S+`), effectively obtaining the third column in a line.
-
-Doing it this way has poor human readability, but avoids the issues that using `awk {print $3}` or `cut -f3` causes, arising from double-spacing in some lines.
-
-The first `sort` arranges everything in order.
-
-`uniq -c` counts all the occurences and returns the count in front of the value. Without the initial `sort`, `uniq -c` does not work properly.
-
-`sort -nr` sorts numerically (`-n`) by the first value, and then reverses the order (`-r`) from increasing to decreasing.
-
-### 9. Which task appears most often in system_small.log?
+### 9. How many unique users are in app_small.log?
 
 ![Task 9](task9.png)
 
 **Explanation**
 
-`grep -oP "task=\K[^ ]+"` returns only the matching string (`-o`) after `=` (`\K`), finds any non-space character (`[^ ]`) as many times as it can (`+`). `-P` for PCRE.
+`grep -oP "user=\K[^ ]+"` returns only the matching string (`-o`) after `=` (`\K`), finds any non-space character (`[^ ]`) as many times as it can (`+`). `-P` for PCRE.
 
 The first `sort` arranges everything in order.
 
-`uniq -c` counts all the occurences and returns the count in front of the value. Without the initial `sort`, `uniq -c` does not work properly.
+`uniq` returns only unique occurences (removes duplicates).
 
-`sort -nr` sorts numerically (`-n`) by the first value, and then reverses the order (`-r`) from increasing to decreasing.
-
-`head -n 1` grabs the first (`-n 1`) line from the returned value.
+`wc -l` counts the returned lines.
